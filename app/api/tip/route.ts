@@ -79,7 +79,10 @@ export async function POST(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Error desconocido' },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: corsHeaders 
+      }
     )
   }
 }
