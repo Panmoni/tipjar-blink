@@ -42,21 +42,31 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    console.log('POST request started')
     const body = await request.json()
+    console.log('Request body:', body)
+    
     const senderAddress = new PublicKey(body.account)
+    console.log('Sender address:', senderAddress.toString())
+    
     const url = new URL(request.url)
     const amountStr = url.searchParams.get('amount')
+    console.log('Amount string:', amountStr)
     
-    if (!amountStr) {
+    if (!amountStr || amountStr === '{amount}') {
       throw new Error("Amount parameter is required")
     }
- 
+
     const amount = parseFloat(amountStr)
-    if (isNaN(amount)) {
+    console.log('Parsed amount:', amount)
+    
+    if (isNaN(amount) || amount <= 0) {
       throw new Error("Invalid amount")
     }
     
     const lamports = Math.round(amount * LAMPORTS_PER_SOL)
+    console.log('Lamports:', lamports)
+
     const transaction = new Transaction()
     const instruction = SystemProgram.transfer({
       fromPubkey: senderAddress,
@@ -69,17 +79,17 @@ export async function POST(request: Request) {
     
     const latestBlockhash = await connection.getLatestBlockhash()
     transaction.recentBlockhash = latestBlockhash.blockhash
- 
+
     const serializedTransaction = transaction.serialize({ 
       requireAllSignatures: false,
       verifySignatures: false
     })
- 
+
     return NextResponse.json({
       transaction: Buffer.from(serializedTransaction).toString('base64'),
       message: `Gracias por tu propina de ${amount} SOL!`
     }, { headers: corsHeaders })
- 
+
   } catch (error) {
     console.error('POST Error:', error)
     return NextResponse.json(
@@ -87,7 +97,7 @@ export async function POST(request: Request) {
       { status: 500, headers: corsHeaders }
     )
   }
- }
+}
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders })
