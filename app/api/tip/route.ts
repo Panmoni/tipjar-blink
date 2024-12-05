@@ -85,5 +85,5 @@ export async function POST(request: Request) {
 }
 
 export async function OPTIONS() {
-  return new NextResponse(null, { headers: corsHeaders })
+  return NextResponse.json({}, { headers: corsHeaders })
 }
