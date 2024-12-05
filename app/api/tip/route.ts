@@ -62,13 +62,13 @@ export async function POST(request: Request) {
     if (!amountStr) {
       throw new Error("Amount parameter is required")
     }
-
+ 
     const amount = parseFloat(amountStr)
     if (isNaN(amount)) {
       throw new Error("Invalid amount")
     }
     
-    const lamports = Math.round(amount * LAMPORTS_PER_SOL) // Ensure integer
+    const lamports = Math.round(amount * LAMPORTS_PER_SOL)
     const transaction = new Transaction()
     const instruction = SystemProgram.transfer({
       fromPubkey: senderAddress,
@@ -78,18 +78,20 @@ export async function POST(request: Request) {
     
     transaction.add(instruction)
     transaction.feePayer = senderAddress
-
-    // Serialize without requiring signatures
+    
+    const latestBlockhash = await connection.getLatestBlockhash()
+    transaction.recentBlockhash = latestBlockhash.blockhash
+ 
     const serializedTransaction = transaction.serialize({ 
       requireAllSignatures: false,
       verifySignatures: false
     })
-
+ 
     return NextResponse.json({
       transaction: Buffer.from(serializedTransaction).toString('base64'),
       message: `Gracias por tu propina de ${amount} SOL!`
     }, { headers: corsHeaders })
-
+ 
   } catch (error) {
     console.error('POST Error:', error)
     return NextResponse.json(
@@ -97,7 +99,7 @@ export async function POST(request: Request) {
       { status: 500, headers: corsHeaders }
     )
   }
-}
+ }
 
 export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders })
