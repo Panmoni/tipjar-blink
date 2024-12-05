@@ -33,18 +33,6 @@ export async function GET() {
           label: '0.1 SOL', 
           href: '/api/tip?amount=0.1'
         },
-        {
-          type: 'post',
-          label: 'Cantidad personalizada',
-          href: '/api/tip?amount={amount}',
-          parameters: [
-            {
-              name: 'amount',
-              label: 'Cantidad en SOL',
-              required: true
-            }
-          ]
-        }
       ]
     }
   }
