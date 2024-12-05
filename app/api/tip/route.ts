@@ -71,18 +71,19 @@ export async function POST(request: Request) {
     const latestBlockhash = await connection.getLatestBlockhash()
     transaction.recentBlockhash = latestBlockhash.blockhash
 
-    return NextResponse.json({
+    const response = {
       transaction: Buffer.from(transaction.serialize()).toString('base64'),
       message: `Gracias por tu propina de ${amount} SOL!`
-    }, { headers: corsHeaders })
+    }
+    
+    console.log('POST Response:', response)
+    return NextResponse.json(response, { headers: corsHeaders })
 
   } catch (error) {
+    console.error('POST Error:', error)
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Error desconocido' },
-      { 
-        status: 500,
-        headers: corsHeaders 
-      }
+      { status: 500, headers: corsHeaders }
     )
   }
 }
