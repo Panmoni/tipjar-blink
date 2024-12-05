@@ -47,6 +47,10 @@ export async function POST(request: Request) {
     console.log('Request body:', body)
     
     const senderAddress = new PublicKey(body.account)
+    if (senderAddress.equals(SystemProgram.programId)) {
+      throw new Error("Invalid sender address")
+    }
+    
     console.log('Sender address:', senderAddress.toString())
     
     const url = new URL(request.url)
