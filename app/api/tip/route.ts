@@ -57,27 +57,38 @@ export async function POST(request: Request) {
     const body = await request.json()
     const senderAddress = new PublicKey(body.account)
     const url = new URL(request.url)
-    const amount = parseFloat(url.searchParams.get('amount') || '0.01')
+    const amountStr = url.searchParams.get('amount')
     
+    if (!amountStr) {
+      throw new Error("Amount parameter is required")
+    }
+
+    const amount = parseFloat(amountStr)
+    if (isNaN(amount)) {
+      throw new Error("Invalid amount")
+    }
+    
+    const lamports = Math.round(amount * LAMPORTS_PER_SOL) // Ensure integer
     const transaction = new Transaction()
     const instruction = SystemProgram.transfer({
       fromPubkey: senderAddress,
       toPubkey: RECIPIENT_ADDRESS,
-      lamports: amount * LAMPORTS_PER_SOL
+      lamports
     })
     
     transaction.add(instruction)
     transaction.feePayer = senderAddress
-    const latestBlockhash = await connection.getLatestBlockhash()
-    transaction.recentBlockhash = latestBlockhash.blockhash
 
-    const response = {
-      transaction: Buffer.from(transaction.serialize()).toString('base64'),
+    // Serialize without requiring signatures
+    const serializedTransaction = transaction.serialize({ 
+      requireAllSignatures: false,
+      verifySignatures: false
+    })
+
+    return NextResponse.json({
+      transaction: Buffer.from(serializedTransaction).toString('base64'),
       message: `Gracias por tu propina de ${amount} SOL!`
-    }
-    
-    console.log('POST Response:', response)
-    return NextResponse.json(response, { headers: corsHeaders })
+    }, { headers: corsHeaders })
 
   } catch (error) {
     console.error('POST Error:', error)
