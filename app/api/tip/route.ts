@@ -1,3 +1,5 @@
+// app/api/tip/route.ts
+
 import { NextResponse } from 'next/server'
 import { ActionGetResponse } from '@solana/actions'
 import { Connection, PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js'
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
     if (senderAddress.equals(SystemProgram.programId)) {
       throw new Error("Invalid sender address")
     }
-    
+
     console.log('Sender address:', senderAddress.toString())
     
     const url = new URL(request.url)
